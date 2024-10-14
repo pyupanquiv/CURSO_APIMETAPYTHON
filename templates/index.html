@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Mensajes Log</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <script src='main.js'></script>
+<style>
+    table{
+        width: 80%;
+        border-collapse: collapse;
+        margin: 20px auto;
+    }
+    th, td{
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    th{
+        background-color: #f2f2f2;
+    }
+</style>
+
+</head>
+<body>
+    <h2>Registro de Mensajes</h2>
+    
+    <table>
+        <tr>
+            <th>Fecha y Hora</th>
+            <th>Mensaje</th>
+        </tr>
+        {% for registro in registros %}
+        <tr>
+            <td>{{ registro.fecha_y_hora}}</td>
+            <td>{{registro.texto}}</td>
+        </tr>
+
+        {% endfor %}
+    </table>
+    
+    <ul>
+        
+
+    </ul>
+</body>
+</html>
