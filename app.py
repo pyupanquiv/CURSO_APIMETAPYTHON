@@ -55,89 +55,78 @@ def verificar_token(req):
 
 def recibir_mensajes(req):
     try:
-            req = request.get_json()
-            entry = req['entry'][0]
-            changes = entry['changes'][0]
-            value = changes['value']
-            objeto_mensaje = value['messages']
+        req_data = request.get_json()
+        if not req_data:
+            return jsonify({'error': 'Invalid JSON'}), 400
 
-            if objeto_mensaje:
-                 messages = objeto_mensaje[0]
+        # Debug: Imprimir el JSON recibido para verificar la estructura
+        print(json.dumps(req_data, indent=2))
 
-                 if "type" in messages:
-                      tipo = messages["type"]
+        entry = req_data.get('entry', [])[0]
+        changes = entry.get('changes', [])[0]
+        value = changes.get('value', {})
+        objeto_mensaje = value.get('messages', [])
 
-                      if tipo == "interactive":
-                           return 0
-                      if "text" in messages:
-                           text = messages["text"]["body"]
-                           numero = messages["from"]
-                           
-                           enviar_mensajes_whatsapp(text,numero)
+        if objeto_mensaje:
+            message = objeto_mensaje[0]
+            message_type = message.get('type', '')
 
+            if message_type == 'text':
+                text = message['text']['body']
+                number = message['from']
 
-            return jsonify({'message': 'EVENT_RECEIVED'})
+                enviar_mensajes_whatsapp(text, number)
+
+        return jsonify({'message': 'EVENT_RECEIVED'})
+
     except Exception as e:
-                return jsonify({'message': 'EVENT_RECEIVED'})
+        agregar_mensajes_log(str(e))
+        return jsonify({'message': 'EVENT_RECEIVED'})
 
-def enviar_mensajes_whatsapp(texto,number):
+def enviar_mensajes_whatsapp(texto, number):
     texto = texto.lower()
 
     if "hola" in texto:
-         data={
-                "messaging_product": "whatsapp",    
-                "recipient_type": "individual",
-                "to": number,
-                "type": "text",
-                "text": {
-                    "preview_url": false,
-                    "body": "Hello Paul Como Estas"
-             }
+        data = {
+            "messaging_product": "whatsapp",    
+            "recipient_type": "individual",
+            "to": number,
+            "type": "text",
+            "text": {
+                "preview_url": False,
+                "body": "Hello Paul Como Estas"
+            }
         }
     else:
-         data={
-                "messaging_product": "whatsapp",    
-                "recipient_type": "individual",
-                "to": number,
-                "type": "text",
-                "text": {
-                    "preview_url": false,
-                    "body": "Hola, visita mi web Paul Yupanqui"
-             }
+        data = {
+            "messaging_product": "whatsapp",    
+            "recipient_type": "individual",
+            "to": number,
+            "type": "text",
+            "text": {
+                "preview_url": False,
+                "body": "Hola, visita mi web Paul Yupanqui"
+            }
         }
-    #Convetir en diccionario a formato JSON
+
+    # Convertir en diccionario a formato JSON
     data = json.dumps(data)
 
     headers = {
-         "Content-Type" : "application/json",
-         "Authorization" : "Bearer EAARPO5ZBdXIEBO9TWECMEEtLMxQBGucUAtk7lCniJp3UKnzQc7AaoqxZCD5Xs1nRawqZABp2rfEGUvMgG7IaiGRaVgXsky34tQl9e92wUSSMwzrB7zrmDMp3WXSwGcVb9lqPbZB1ZC1NJDe9ExWEg7vu0KTmXIEtgVbGvXIUZA9rHBhAg9nhHZBdU4qiokZCSqJ8bbR7kCE93CfqXkTcHrUvACuYvv565xs5wWJLH2FGSNoZD"
+        "Content-Type": "application/json",
+        "Authorization": "Bearer EAARPO5ZBdXIEBO9TWECMEEtLMxQBGucUAtk7lCniJp3UKnzQc7AaoqxZCD5Xs1nRawqZABp2rfEGUvMgG7IaiGRaVgXsky34tQl9e92wUSSMwzrB7zrmDMp3WXSwGcVb9lqPbZB1ZC1NJDe9ExWEg7vu0KTmXIEtgVbGvXIUZA9rHBhAg9nhHZBdU4qiokZCSqJ8bbR7kCE93CfqXkTcHrUvACuYvv565xs5wWJLH2FGSNoZD"
     }
 
     connection = http.client.HTTPSConnection("graph.facebook.com")
 
     try:
-        connection.request("POST","/v20.0/360639233803052/messages", data, headers) 
+        connection.request("POST", "/v20.0/360639233803052/messages", data, headers)
         response = connection.getresponse()
         print(response.status, response.reason)
     except Exception as e:
-        agregar_mensajes_log(json.dumps(e))
+        agregar_mensajes_log(str(e))
     finally:
-         connection.close()
-
-
-    req_data = req.get_json()  # Asegúrate de obtener JSON correctamente
-
-    if not req_data:
-        return jsonify({'error': 'Invalid JSON'}), 400
-
-    mensaje_texto = json.dumps(req_data, indent=2)  # Convierte el JSON a texto para guardar en la base de datos
-    agregar_mensajes_log(mensaje_texto)  # Almacenar el mensaje en el log
-    
-
-
-
-
-    return jsonify({'message': 'EVENT_RECEIVED'})
+        connection.close()
 
 # Función para agregar mensajes y guardar en la base de datos
 def agregar_mensajes_log(texto):
