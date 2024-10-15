@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import http.client
 import json
 
 app = Flask(__name__)
@@ -71,9 +72,8 @@ def recibir_mensajes(req):
                       if "text" in messages:
                            text = messages["text"]["body"]
                            numero = messages["from"]
-
-                           agregar_mensajes_log(json.dumps(text))
-                           agregar_mensajes_log(json.dumps(numero))
+                           
+                           enviar_mensajes_whatsapp(text,numero)
 
 
             return jsonify({'message': 'EVENT_RECEIVED'})
@@ -105,6 +105,25 @@ def enviar_mensajes_whatsapp(texto,number):
                     "body": "Hola, visita mi web Paul Yupanqui"
              }
         }
+    #Convetir en diccionario a formato JSON
+    data = json.dumps(data)
+
+    headers = {
+         "Content-Type" : "application/json",
+         "Authorization" : "Bearer EAARPO5ZBdXIEBO9TWECMEEtLMxQBGucUAtk7lCniJp3UKnzQc7AaoqxZCD5Xs1nRawqZABp2rfEGUvMgG7IaiGRaVgXsky34tQl9e92wUSSMwzrB7zrmDMp3WXSwGcVb9lqPbZB1ZC1NJDe9ExWEg7vu0KTmXIEtgVbGvXIUZA9rHBhAg9nhHZBdU4qiokZCSqJ8bbR7kCE93CfqXkTcHrUvACuYvv565xs5wWJLH2FGSNoZD"
+    }
+
+    connection = http.client.HTTPSConnection("graph.facebook.com")
+
+    try:
+        connection.request("POST","/v20.0/360639233803052/messages", data, headers) 
+        response = connection.getresponse()
+        print(response.status, response.reason)
+    except Exception as e:
+        agregar_mensajes_log(json.dumps(e))
+    finally:
+         connection.close()
+
 
     req_data = req.get_json()  # Asegúrate de obtener JSON correctamente
 
