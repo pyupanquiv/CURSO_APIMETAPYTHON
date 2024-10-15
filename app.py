@@ -80,7 +80,31 @@ def recibir_mensajes(req):
     except Exception as e:
                 return jsonify({'message': 'EVENT_RECEIVED'})
 
+def enviar_mensajes_whatsapp(texto,number):
+    texto = texto.lower()
 
+    if "hola" in texto:
+         data={
+                "messaging_product": "whatsapp",    
+                "recipient_type": "individual",
+                "to": number,
+                "type": "text",
+                "text": {
+                    "preview_url": false,
+                    "body": "Hello Paul Como Estas"
+             }
+        }
+    else:
+         data={
+                "messaging_product": "whatsapp",    
+                "recipient_type": "individual",
+                "to": number,
+                "type": "text",
+                "text": {
+                    "preview_url": false,
+                    "body": "Hola, visita mi web Paul Yupanqui"
+             }
+        }
 
     req_data = req.get_json()  # Asegúrate de obtener JSON correctamente
 
