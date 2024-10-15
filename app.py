@@ -48,9 +48,9 @@ TOKEN_ANDERCODE = 'ANDERCODE'
 @app.route('/webhook', methods=['GET','POST'])
 def webhook():
     if request.method =='GET':
-        challenge= verificar_token(request)
+        challenge = verificar_token(request)
         return challenge
-    elif request.method== 'POST':
+    elif request.method == 'POST':
         response = recibir_mensajes(request)
         return response
 
@@ -64,9 +64,9 @@ def verificar_token(req):
         return jsonify({'error':'Token Invalido'}),401
 
 def recibir_mensajes(req):
-    req =request.get_json()
+    req = request.get_json()
     agregar_mensajes_log(req)
-    
+
     return jsonify({'message':'EVENT_RECEIVED'})
 
 if __name__=='__main__':
